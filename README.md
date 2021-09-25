@@ -4,7 +4,7 @@
 
 https://www.datafountain.cn/competitions/512/ranking?isRedance=0&sch=1804&stage=A
 
-本项目是该比赛的代码和思路整理，许多代码可以多次复用，因为整理出来
+本项目是该比赛的代码和思路整理，许多代码可以多次复用，为了日后面试或项目需要，从而整理出来
 
 #### 数据处理
 
@@ -78,13 +78,48 @@ src/bert_models/get_vocab_mapping.py
 
   统计了train dataset中的标签的频率，可以明显看出标签存在的明显的不均衡的情况
 
-  ​	**todo**
+  - Class weights/ Sample weights
 
-  - Class weights/ sample weights
+    - Class weights
+
+      对于ce loss添加系数，来控制少数类别的样本对于总loss的贡献
+
+      ```python
+      loss_fct = nn.CrossEntropyLoss(weight=weight)
+      ```
+
+    - Sample weights
+
+      是关于如何将train dataset中不均衡的数据放入到batch中，其中抽样的方法一共有3种：
+
+      - Instance-balanced sampling：每个图片被抽到的概率相同，即我们一般使用的抽样的方式
+
+      - Class balanced sampling: 每个类别被抽到的概率相同，即先确定类别，然后从对应的类别中的获取样本
+
+      - Re-sampling: 假设$$q \in(0,1)$$， $$p_i=\frac{n^q_i}{\sum_{j=1}^Cn_j^q}$$，其中$$C$$表示数据集的类别的数目，$$n_i$$是类别的$$i$$的样本的数量。
+
+        ```python
+        # 对应main中的train的设定
+        parser.add_argument("--use_weighted_sampler", action="store_true", help="use weighted sampler")                        
+        ```
+
   - Focal loss
+
+    Reference paper: https://arxiv.org/pdf/1708.02002.pdf
+
+    Reference: https://zhuanlan.zhihu.com/p/32423092
+
+    专门针对于样本不均衡的情况下的loss，其主要的思想就是在二分类问题中，当正负样本不均衡的时候，如果正样本的数目过多，如果是普通的交叉熵损失函数，那边模型在训练过程只会越来越关注正样本的分类是否正确，所以focal loss设计的理念就是增大如上情况的负样本分类正确与否对于模型的贡献
+
   - dice loss
 
+    **to do**
+
 - Muliti-sample dropout
+
+  Reference paper: https://arxiv.org/pdf/1905.09788.pdf
+
+  该方法是提分效果最明显，但是思想很简单，大道至简也不过如此吧。**to do: orignal dropout**
 
 - Contrastive learning
 
