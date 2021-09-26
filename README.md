@@ -96,7 +96,7 @@ src/bert_models/get_vocab_mapping.py
 
       - Class balanced sampling: 每个类别被抽到的概率相同，即先确定类别，然后从对应的类别中的获取样本
 
-      - Re-sampling: 假设$$q \in(0,1)$$， $$p_i=\frac{n^q_i}{\sum_{j=1}^Cn_j^q}$$，其中$$C$$表示数据集的类别的数目，$$n_i$$是类别的$$i$$的样本的数量。
+      - Re-sampling: 假设$q \in(0,1)$$， $$p_i=\frac{n^q_i}{\sum_{j=1}^Cn_j^q}$$，其中$$C$$表示数据集的类别的数目，$$n_i$$是类别的$$i$$的样本的数量。
 
         ```python
         # 对应main中的train的设定
@@ -119,11 +119,28 @@ src/bert_models/get_vocab_mapping.py
 
   Reference paper: https://arxiv.org/pdf/1905.09788.pdf
 
-  该方法是提分效果最明显，但是思想很简单，大道至简也不过如此吧。**to do: orignal dropout**
+  该方法是提分效果最明显，但是思想很简单。original dropout是作用在pooling层之后，分类器之前，相当于把对于分类器的输入按照一定的概率dropout掉，而multi-Sample Dropout则是增加多个dropout，这样相当于扩大了输入到分类器中的样本的数量，其实就是数据扩充。
+
+  在比赛中的使用则是对于bert预训练模型pooling的输出通过多个dropout，将通过dropout的结果求和之后（根据参数**ms-average**决定是否做平均）作为logits来计算loss。
 
 - Contrastive learning
 
-  - Info NCE
+  Contrastive learning是之前我并没有接触过的learning的方法，本次比赛中通过contrastive learning来提升sentence embedding。
+
+  我们知道深度学习的本质就是表示学习：表示学习的目标为输入一个$x$，学习一个表示$z$，希望通过这个$z$就能知道$x$。contrastive learning分为
+
+  - 生成式自监督（AutoEncoder）
+
+    输入一个图片到Encoder中，然后学习出能够表征出这幅图片的特征，然后再输入一个模糊的图片，然后这个模糊的图片能够利用之前学习到的特征重构出原始的图片，这里学习到的能够提取出表征图片特征的encoder就叫做autoEncoder。但是这一类方法往往太集中表示像素级的特征，整体的语义建模上不够好。
+
+  - 判别式自监督
+
+    学习能够帮助我们判别两个物体是否是同一个标签的特征。
+
+    - Info NCE（最大互信息目标）**to do**
+
+      $$L_y = -log\frac{exp(sim(y, y^{\prime})\\/\tau)}{\sum_{i=0}^{N}exp(sim(y, y^{\prime})\\/\tau)}$$
+
   - Supervised CL
 
 - Adversarial training
