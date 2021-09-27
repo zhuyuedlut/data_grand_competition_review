@@ -127,7 +127,29 @@ src/bert_models/get_vocab_mapping.py
 
   Contrastive learning是之前我并没有接触过的learning的方法，本次比赛中通过contrastive learning来提升sentence embedding。
 
-  我们知道深度学习的本质就是表示学习：表示学习的目标为输入一个$x$，学习一个表示$z$，希望通过这个$z$就能知道$x$。contrastive learning分为
+  我们知道深度学习的本质就是表示学习，既然是表示学习，那么核心就是学习一个映射函数$f$，把样本$x$编码成其表示$f(x)$，Contrastive learning的核心就是使得$f$满足公式：
+
+  $$s(f(x),f(x^+)) >> s(f(x), f(x^-))$$
+
+  公式中的$x^+$就是和$x$类似的样本，$x^-$就是和$x$不相似的样本，$S(\cdot, \cdot)$这是一个度量样本之间相似程度的函数，一个比较典型的score函数就是向量内积。即优化下面这一期望：
+
+  $$E=[-log(\frac{e^{f(x)^Tf(x^+)}}{e^{f(x)^Tf(x^+)}+e^{f(x)^Tf(x^-)}})]$$
+
+  如果对于一个$x$，有1个正例和N-1个负例，那么这个loss就可以看做一个N分类问题，那么这个loss就可以看做一个2分类问题，实际就是一个交叉熵。
+
+  Contrastive learning优化策略：
+
+  - 增大batch
+  - 提升encoder模型能力
+  - 提升数据增加技术
+
+  reference paper: [Momentum Contrast for Unsupervised Visual Representation Learning](https://arxiv.org/abs/1911.05722)
+
+  ![image-20210927232808402](/Users/zhuyue/Code/Python/data_grand_competition_review/contrastive_learning.png)
+
+  (a) 图是普通的对比学习流程，输入正负样本计算contrastive loss进行学习，此时负样例也会为loss产生贡献，因此也就会有梯度回传给对应的负样本的encoder，那么这样在实现的时候，样本的数量必然会受到batch size的限制，从而影响到表示的质量。
+
+  所以Contrastive learning的优化策略其中之一就是**增大batch size**，从而出现(b)图memory bank，将所有的样本存起来，然后每次随机采样，这样就可以认为负例的样本理论上可以达到所有样本的数量。具体的做法就是在train的过程中每一次epoch，encoder所有的负样本，但是这样很吃内存。
 
   - 生成式自监督（AutoEncoder）
 
