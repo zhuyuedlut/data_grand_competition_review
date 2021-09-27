@@ -145,7 +145,7 @@ src/bert_models/get_vocab_mapping.py
 
   reference paper: [Momentum Contrast for Unsupervised Visual Representation Learning](https://arxiv.org/abs/1911.05722)
 
-  ![image-20210927232808402](/Users/zhuyue/Code/Python/data_grand_competition_review/contrastive_learning.png)
+  ![image-20210927232808402](https://github.com/zhuyuedlut/data_grand_competition_review/blob/master/img/contrastive_learning.png)
 
   (a) 图是普通的对比学习流程，输入正负样本计算contrastive loss进行学习，此时负样例也会为loss产生贡献，因此也就会有梯度回传给对应的负样本的encoder，那么这样在实现的时候，样本的数量必然会受到batch size的限制，从而影响到表示的质量。
 
@@ -161,7 +161,7 @@ src/bert_models/get_vocab_mapping.py
 
     - Info NCE（最大互信息目标）**to do**
 
-      $$L_y = -log\frac{exp(sim(y, y^{\prime})\\/\tau)}{\sum_{i=0}^{N}exp(sim(y, y^{\prime})\\/\tau)}$$
+      $$L_y = -log\frac{exp(sim(y, y^{\prime})\/\tau)}{\sum_{i=0}^{N}exp(sim(y, y^{\prime})\/\tau)}$$
 
   - Supervised CL
 
