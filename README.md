@@ -145,49 +145,25 @@ src/bert_models/get_vocab_mapping.py
 
   reference paper: [Momentum Contrast for Unsupervised Visual Representation Learning](https://arxiv.org/abs/1911.05722)
 
-  ![image-20210927232808402](/Users/zhuyue/Code/Python/data_grand_competition_review/contrastive_learning.png)
+  ![image-20210927232808402](https://github.com/zhuyuedlut/data_grand_competition_review/blob/master/img/contrastive_learning.png)
 
   (a) 图是普通的对比学习流程，输入正负样本计算contrastive loss进行学习，此时负样例也会为loss产生贡献，因此也就会有梯度回传给对应的负样本的encoder，那么这样在实现的时候，样本的数量必然会受到batch size的限制，从而影响到表示的质量。
 
-  所以Contrastive learning的优化策略其中之一就是**增大batch size**，从而出现(b)图memory bank，将所有的样本存起来，然后每次随机采样，这样就可以认为负例的样本理论上可以达到所有样本的数量。具体的做法就是在train的过程中每一次epoch，encoder所有的负样本，但是这样很吃内存，除了这个问题之外，就是无法实时更新memory bank使用的encoder，**MoCo**方法则解决了上述的两个问题。
+  所以Contrastive learning的优化策略其中之一就是**增大batch size**，从而出现(b)图memory bank，将所有的样本存起来，然后每次随机采样，这样就可以认为负例的样本理论上可以达到所有样本的数量。具体的做法就是在train的过程中每一次epoch，encoder所有的负样本，但是这样很吃内存。
 
-  首先针对于memory bank需要同时存储所有的样本的encoder，MoCo用一个queue来维护当前的negative  candidates，对于一个batch，将batch中的样本encode之后的结果放入到queue中，同时把最oldest queue element dequeued，这样就能保证queue decouples the dictionary size from batch size.
+  - 生成式自监督（AutoEncoder）
 
-  同时对于dictionary所使用的encoder的参数采用动量更新的方法利用正例encoder的参数$\theta_q$，公式如下：
+    输入一个图片到Encoder中，然后学习出能够表征出这幅图片的特征，然后再输入一个模糊的图片，然后这个模糊的图片能够利用之前学习到的特征重构出原始的图片，这里学习到的能够提取出表征图片特征的encoder就叫做autoEncoder。但是这一类方法往往太集中表示像素级的特征，整体的语义建模上不够好。
 
-  $$\theta_k=m\theta_k + (1-m)\theta_q$$
+  - 判别式自监督
 
-  训练该对应的损失函数为：
+    学习能够帮助我们判别两个物体是否是同一个标签的特征。
 
-  $$L_q = -log\frac{exp(q{\cdot}k_+/\tau)}{exp(\sum_{i=0}^Kexp(q{\cdot}k_i/\tau))}$$
+    - Info NCE（最大互信息目标）**to do**
 
-  本次比赛中train dataset中提供了对应的label，那么如何将label应用到contrastive learning中，
+      $$L_y = -log\frac{exp(sim(y, y^{\prime})\/\tau)}{\sum_{i=0}^{N}exp(sim(y, y^{\prime})\/\tau)}$$
 
-  - 其实就是利用标签区分contrastive learning中的正负样本，进行有监督学习
-  - 然后学习classifier参数
-
-  reference paper:[Supervised Contrastive Learning](https://arxiv.org/abs/2004.11362)
-
-  ##### contrastive learning表示的评价
-
-  reference paper: [Understanding Contrastive Representation Learning through Alignment and Uniformity on the Hypersphere](https://arxiv.org/abs/2005.10242)
-
-  - alignment：匹配正样本的能力
-  - uniformity：向量整体分布的均匀程度
-    - encode分布的信息量的多少
-    - 区分负样本对的能力
-
-  ##### contrastive learning in NLP
-
-  Reference paper: [Supervised Contrastive Learning for Pre-trained Language Model Fine-tuning](https://arxiv.org/abs/2011.01403)
-
-  基本思想就是：利用对比学习将标签样本的表征拉近，将不同标签的表征拉远，再根据前面的介绍，利用交叉熵和对比学习的损失函数进行模型的训练，计算公式如下：
-  $$
-  L = (1 - \lambda)L_{CE} + \lambda{L_{SCL}}
-  $$
-  这里$SCL$损失函数的选择有两种分别为$NTXENT$另外一个则是$SUPCON$
-
-  
+  - Supervised CL
 
 - Adversarial training
 
